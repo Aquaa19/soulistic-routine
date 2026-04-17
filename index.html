@@ -58,8 +58,8 @@
             align-items: center; 
         }
 
-        .sub-sel { flex: 1; min-width: 120px; }
-        .t-init { width: 70px; }
+        .sub-sel { flex: 1; min-width: 140px; }
+        .t-init { width: 70px; background-color: #f9f9f9; }
 
         h3 { margin-top: 40px; color: #555; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         iframe { width: 100%; height: 800px; border: 1px solid #ddd; margin-top: 20px; border-radius: 8px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -103,7 +103,26 @@
     <script>
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         const slots = ["3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
-        const subjects = ["None", "Biology", "History", "Mathematics", "Bengali", "Chemistry", "Computer", "Geography", "English", "Physics", "Hindi", "Booster Dose"];
+        
+        // Subject to Initial mapping
+        // Note: For multiple instances, we differentiate them in the value
+        const subjectList = [
+            { label: "None", sub: "None", init: "" },
+            { label: "Hindi (TS)", sub: "Hindi", init: "TS" },
+            { label: "Physics (SD)", sub: "Physics", init: "SD" },
+            { label: "Biology (BM)", sub: "Biology", init: "BM" },
+            { label: "History (AS)", sub: "History", init: "AS" },
+            { label: "Geography (AS)", sub: "Geography", init: "AS" },
+            { label: "Math (SA)", sub: "Mathematics", init: "SA" },
+            { label: "Math (AM)", sub: "Mathematics", init: "AM" },
+            { label: "Math (GM)", sub: "Mathematics", init: "GM" },
+            { label: "Bengali (TS)", sub: "Bengali", init: "TS" },
+            { label: "Chemistry (PSC)", sub: "Chemistry", init: "PSC" },
+            { label: "English (SS)", sub: "English", init: "SS" },
+            { label: "English (AM)", sub: "English", init: "AM" },
+            { label: "Computer", sub: "Computer", init: "--" },
+            { label: "Booster Dose", sub: "Booster Dose", init: "IJ" }
+        ];
 
         function init() {
             const tbody = document.getElementById('adminBody');
@@ -112,13 +131,16 @@
                 let cellsHtml = `<td><strong>${day}</strong></td>`;
                 
                 slots.forEach(slot => {
+                    const selectId = `sel-${day}-${slot.replace(':', '').replace(' ', '')}`;
+                    const inputId = `in-${day}-${slot.replace(':', '').replace(' ', '')}`;
+                    
                     cellsHtml += `
                         <td>
                             <div class="cell-group">
-                                <select class="sub-sel" data-day="${day}" data-slot="${slot}">
-                                    ${subjects.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                <select class="sub-sel" id="${selectId}" data-day="${day}" data-slot="${slot}" onchange="autoFillInitials('${selectId}', '${inputId}')">
+                                    ${subjectList.map((item, index) => `<option value="${index}">${item.label}</option>`).join('')}
                                 </select>
-                                <input type="text" class="t-init" data-day="${day}" data-slot="${slot}" placeholder="Initials">
+                                <input type="text" class="t-init" id="${inputId}" placeholder="Initials">
                             </div>
                         </td>
                     `;
@@ -129,18 +151,34 @@
             });
         }
 
+        function autoFillInitials(selectId, inputId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            const selectedItem = subjectList[select.value];
+            
+            if (selectedItem) {
+                input.value = selectedItem.init;
+            }
+        }
+
         function updateRoutine() {
             const schedule = {};
+            days.forEach(day => schedule[day] = {});
+
             const selects = document.querySelectorAll('.sub-sel');
             const inputs = document.querySelectorAll('.t-init');
             
-            days.forEach(day => schedule[day] = {});
-
             selects.forEach((sel, i) => {
-                const sub = sel.value;
+                const day = sel.dataset.day;
+                const slot = sel.dataset.slot;
+                const selectedItem = subjectList[sel.value];
                 const teacher = inputs[i].value || "--";
-                if (sub !== "None") {
-                    schedule[sel.dataset.day][sel.dataset.slot] = { subject: sub, teacher: teacher };
+                
+                if (selectedItem && selectedItem.sub !== "None") {
+                    schedule[day][slot] = { 
+                        subject: selectedItem.sub, 
+                        teacher: teacher 
+                    };
                 }
             });
 
