@@ -126,7 +126,7 @@
 
     <script>
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const slots = ["14:00", "15:00", "16:00", "17:00", "18:00"]; // Strictly using 24-hour format
+        const slots = ["2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"]; // 12-hour format restored
         
         const subjectList = [
             { label: "None", sub: "None", init: "" },
@@ -174,8 +174,8 @@
                 let cellsHtml = `<td><strong>${day}</strong></td>`;
                 
                 slots.forEach(slot => {
-                    const selectId = `sel-${day}-${slot.replace(':', '')}`;
-                    const inputId = `in-${day}-${slot.replace(':', '')}`;
+                    const selectId = `sel-${day}-${slot.replace(':', '').replace(' ', '')}`;
+                    const inputId = `in-${day}-${slot.replace(':', '').replace(' ', '')}`;
                     
                     cellsHtml += `
                         <td>
