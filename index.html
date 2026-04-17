@@ -70,11 +70,11 @@
         <div class="form-row">
             <div>
                 <label><strong>Class:</strong> </label>
-                <input type="text" id="classInput" value="VIII - Bio" style="width: 180px">
+                <input type="text" id="classInput" placeholder="Enter Class (e.g. VIII - Bio)" style="width: 180px">
             </div>
             <div>
                 <label><strong>Session:</strong> </label>
-                <input type="text" id="sessionInput" value="Session 2026–27" style="width: 220px">
+                <input type="text" id="sessionInput" placeholder="Enter Session (e.g. 2026–27)" style="width: 220px">
             </div>
             <button class="btn" onclick="updateRoutine()">Push to Routine Preview</button>
         </div>
@@ -144,8 +144,8 @@
 
             const data = {
                 type: 'UPDATE_ROUTINE',
-                className: document.getElementById('classInput').value,
-                session: document.getElementById('sessionInput').value,
+                className: document.getElementById('classInput').value || "---",
+                session: document.getElementById('sessionInput').value || "---",
                 schedule: schedule
             };
 
