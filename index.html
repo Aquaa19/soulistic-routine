@@ -51,6 +51,13 @@
         }
         .btn:hover { background: #0b4d2e; }
 
+        .btn-reset {
+            background: #dc2626; /* Red color for reset */
+        }
+        .btn-reset:hover {
+            background: #b91c1c;
+        }
+
         /* Horizontal Layout for Cell Content */
         .cell-group { 
             display: flex; 
@@ -76,9 +83,17 @@
             </div>
             <div>
                 <label><strong>Session:</strong> </label>
-                <input type="text" id="sessionInput" placeholder="Enter Session (e.g. 2026–27)" style="width: 220px">
+                <select id="sessionInput" style="width: 180px;">
+                    <option value="Session 2025–26">Session 2025–26</option>
+                    <option value="Session 2026–27" selected>Session 2026–27</option>
+                    <option value="Session 2027–28">Session 2027–28</option>
+                    <option value="Session 2028–29">Session 2028–29</option>
+                    <option value="Session 2029–30">Session 2029–30</option>
+                    <option value="Session 2030–31">Session 2030–31</option>
+                </select>
             </div>
             <button class="btn" onclick="updateRoutine()">Push to Routine Preview</button>
+            <button class="btn btn-reset" onclick="resetRoutine()">Reset</button>
         </div>
 
         <table id="adminTable">
@@ -188,6 +203,24 @@
 
             const iframe = document.getElementById('previewFrame');
             iframe.contentWindow.postMessage(data, '*');
+        }
+
+        function resetRoutine() {
+            // Clear Class input
+            document.getElementById('classInput').value = '';
+            
+            // Reset Session to default (index 1 is 2026-27)
+            document.getElementById('sessionInput').selectedIndex = 1;
+            
+            // Reset all dropdowns to "None" (index 0) and clear initial inputs
+            const selects = document.querySelectorAll('.sub-sel');
+            const inputs = document.querySelectorAll('.t-init');
+            
+            selects.forEach(sel => sel.value = "0");
+            inputs.forEach(input => input.value = "");
+            
+            // Immediately push the empty layout to the preview frame
+            updateRoutine();
         }
 
         window.onload = init;
