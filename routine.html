@@ -58,6 +58,9 @@
         .footer { background: #106d41; padding: 10px 32px; display: flex; align-items: center; justify-content: space-between; color: #ffee00; border-top: 2px solid #d4af37; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .ft-txt { font-size: 11px; font-weight: 900; letter-spacing: 1px; }
 
+        .row-alt td { background: #edf7f1; }
+        .row-norm td { background: #ffffff; }
+
         @media print { 
             body { padding: 0; background: #fff; }
             .page-tools { display: none; } 
@@ -65,6 +68,10 @@
             .hdr { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 15px 32px; }
             .tbl-wrap { padding: 10px; }
             .footer { padding: 8px 32px; }
+            thead tr th, tbody tr td:first-child, .subj, .off-cell, .hdr, .footer, .badge, .logo-hex {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -90,18 +97,15 @@
         </div>
         <div class="tbl-wrap">
             <table>
-                <colgroup><col class="c-day"><col><col><col><col><col></colgroup>
-                <thead>
-                    <tr>
-                        <th>Day</th>
-                        <th>Slot 0 · 2:00 PM</th>
-                        <th>Slot 1 · 3:00 PM</th>
-                        <th>Slot 2 · 4:00 PM</th>
-                        <th>Slot 3 · 5:00 PM</th>
-                        <th>Slot 4 · 6:00 PM</th>
-                    </tr>
+                <colgroup id="routineColgroup">
+                    <!-- Dynamically generated cols -->
+                </colgroup>
+                <thead id="routineThead">
+                    <!-- Dynamically generated headers -->
                 </thead>
-                <tbody id="routineBody"></tbody>
+                <tbody id="routineBody">
+                    <!-- Dynamically generated rows -->
+                </tbody>
             </table>
         </div>
         <div class="footer"><div class="ft-txt" id="footerClass">SOULISTIC IND • CLASS ---</div><div class="ft-txt">★ STUDY HARD · DREAM BIG · ACHIEVE MORE ★</div></div>
@@ -110,7 +114,9 @@
     <script>
         const subjectStyles = {
             "Biology": { bg: "#d1fae5", border: "#059669", color: "#065f46" },
+            "Science": { bg: "#e0f2fe", border: "#0284c7", color: "#075985" }, 
             "History": { bg: "#fef3c7", border: "#d97706", color: "#78350f" },
+            "SST": { bg: "#ffedd5", border: "#ea580c", color: "#7c2d12" }, 
             "Mathematics": { bg: "#dbeafe", border: "#2563eb", color: "#1e3a8a" },
             "Bengali": { bg: "#ede9fe", border: "#7c3aed", color: "#3b0764" },
             "Chemistry": { bg: "#cffafe", border: "#0891b2", color: "#164e63" },
@@ -122,7 +128,6 @@
             "Booster Dose": { bg: "#fee2e2", border: "#dc2626", color: "#7f1d1d", isSpecial: true }
         };
 
-        const slots = ["2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
         window.addEventListener('message', (event) => {
@@ -131,16 +136,39 @@
                 document.getElementById('classNameBadge').innerText = "Class " + data.className;
                 document.getElementById('footerClass').innerText = "SOULISTIC IND • CLASS " + data.className;
                 if(data.session) document.getElementById('sessionBadge').innerText = data.session;
-                renderTable(data.schedule);
+                
+                // Re-render components with awareness of activeSlots
+                renderHeaders(data.activeSlots);
+                renderTable(data.schedule, data.activeSlots);
             }
         });
 
-        function renderTable(schedule) {
+        function renderHeaders(activeSlots) {
+            const colgroup = document.getElementById('routineColgroup');
+            const thead = document.getElementById('routineThead');
+            
+            // Build Colgroups
+            let colHtml = `<col class="c-day">`;
+            let theadHtml = `<tr><th>Day</th>`;
+            
+            activeSlots.forEach((slot, index) => {
+                colHtml += `<col>`;
+                theadHtml += `<th>Slot ${index} · ${slot}</th>`;
+            });
+            theadHtml += `</tr>`;
+            
+            colgroup.innerHTML = colHtml;
+            thead.innerHTML = theadHtml;
+        }
+
+        function renderTable(schedule, activeSlots) {
             const tbody = document.getElementById('routineBody');
             tbody.innerHTML = '';
             
             days.forEach((day, index) => {
                 const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'row-norm' : 'row-alt';
+                
                 const dayCell = document.createElement('td');
                 dayCell.innerHTML = `<div class="day-cell"><span class="day-abbr">${day.substring(0,3)}</span><span class="day-full">${day}</span></div>`;
                 tr.appendChild(dayCell);
@@ -148,19 +176,20 @@
                 const dayData = schedule[day];
                 if (!dayData || Object.keys(dayData).length === 0) {
                     const offCell = document.createElement('td');
-                    offCell.colSpan = slots.length;
+                    offCell.colSpan = activeSlots.length; // Spans only the active slots
                     offCell.innerHTML = `<div class="off-cell"><span class="off-txt">— No Classes Scheduled —</span></div>`;
                     tr.appendChild(offCell);
                 } else {
-                    slots.forEach(slot => {
+                    activeSlots.forEach(slot => {
                         const td = document.createElement('td');
                         const item = dayData[slot];
                         if (item) {
                             const style = subjectStyles[item.subject] || { bg: "#f1f5f9", border: "#94a3b8", color: "#1e293b" };
                             const syringeClass = style.isSpecial ? "subj-syringe" : "";
+                            const initialsHtml = item.teacher ? `<span class="initials">(${item.teacher})</span>` : "";
                             td.innerHTML = `
                                 <div class="subj ${syringeClass}" style="background:${style.bg}; border-color:${style.border}; color:${style.color}">
-                                    <div class="subj-name">${item.subject} <span class="initials">(${item.teacher})</span></div>
+                                    <div class="subj-name">${item.subject} ${initialsHtml}</div>
                                     <div class="subj-time">${slot}</div>
                                 </div>`;
                         }
