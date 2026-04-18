@@ -71,6 +71,9 @@
         .btn-reset { background: #dc2626; }
         .btn-reset:hover { background: #b91c1c; }
 
+        .btn-print { background: #d4af37; color: #051a10; }
+        .btn-print:hover { background: #c19b26; }
+
         /* Horizontal Layout for Cell Content */
         .cell-group { 
             display: flex; 
@@ -125,6 +128,7 @@
             </div>
             <button class="btn" onclick="updateRoutine()">Push to Routine Preview</button>
             <button class="btn btn-reset" onclick="resetRoutine()">Reset</button>
+            <button class="btn btn-print" onclick="printRoutine()">Print Routine</button>
         </div>
 
         <table id="adminTable">
@@ -290,6 +294,14 @@
             inputs.forEach(input => input.value = "");
             
             updateRoutine();
+        }
+
+        function printRoutine() {
+            const iframe = document.getElementById('previewFrame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
         }
 
         window.onload = init;
